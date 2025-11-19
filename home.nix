@@ -1,4 +1,4 @@
-# home.nix: User config via Home Manager. Place in /home/james/.config/home-manager/home.nix; activate with `home-manager switch`.
+# home.nix: User config via Home Manager. Activated system-wide via flake.
 { pkgs, ... }:
 
 {
