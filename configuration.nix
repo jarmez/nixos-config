@@ -2,7 +2,10 @@
 { config, pkgs, lib, inputs, ... }:
 
 {
-  imports = [ ./hyprland.nix ./cosmic.nix ];  # Modular WM/DE.
+  imports = [
+    inputs.hyprland.nixosModules.default  # Hyprland module import (inline config below).
+    inputs.nixos-cosmic.nixosModules.default  # Cosmic module import (inline below).
+  ];
 
   # Boot: systemd-boot with Secure Boot via Lanzaboote.
   boot.loader = {
@@ -16,7 +19,7 @@
   boot.initrd = {
     systemd.enable = true;  # For TPM/FIDO2 in initrd.
     luks.devices."enc" = {
-      device = "/dev/nvme0n1p2";  # Root partition.
+      device = "/dev/nvme0n1p2";  # Root partition. Placeholder: Adjust if needed.
       crypttabExtraOpts = [ "tpm2-device=auto" "fido2-device=auto" ];  # TPM first, FIDO2 fallback.
     };
   };
@@ -102,6 +105,21 @@
   # Fonts/HiDPI.
   fonts.enableDefaultPackages = true;
   services.xserver.videoDrivers = [ "amdgpu" ];  # Though Wayland.
+
+  # Hyprland WM: Inline config (tiling for productivity; trends: Direct import for AMD stability).
+  programs.hyprland = {
+    enable = true;
+    package = inputs.hyprland.packages.${pkgs.system}.hyprland;
+  };
+  environment.sessionVariables = {
+    WLR_NO_HARDWARE_CURSORS = "1";  # AMD Wayland fix.
+    QT_SCALE_FACTOR = "2";  # HiDPI.
+  };
+
+  # Cosmic DE: Inline config (beta tiling hybrid; 2025 trends: Rust efficiency on Ryzen).
+  services.desktopManager.cosmic.enable = true;
+  environment.variables = { COSMIC_SCALE = "2"; };  # HiDPI.
+  environment.sessionVariables.COSMIC_DATA_CONTROL_ENABLED = "1";  # Security: Clipboard control.
 
   # Nix settings.
   nix = {
